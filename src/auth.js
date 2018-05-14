@@ -28,6 +28,17 @@ function getHashParams() {
 
 const stateKey = 'spotify_auth_state';
 
+const state = {};
+
+async function request(endpoint) {
+  const response = await fetch(endpoint.startsWith('https://') ? endpoint : `https://api.spotify.com/v1/${endpoint}`, {
+    headers: {
+      Authorization: `Bearer ${state.accessToken}`,
+    },
+  });
+  return response.json();
+}
+
 const auth = {
   logIn() {
     const clientId = '7e3bd48a271a4d408463315a7696c35f';
@@ -48,27 +59,40 @@ const auth = {
     window.location.href = url;
   },
 
-  async auth() {
+  async setUser() {
     const params = getHashParams();
 
     const accessToken = params.access_token;
-    const state = params.state;
-    const storedSate = localStorage.getItem(stateKey);
 
-    if (accessToken && (!state || state !== storedSate)) {
-      throw new Error('Error in authentication');
+    if (!accessToken) {
+      return;
+    }
+  
+    state.accessToken = accessToken;
+    const user = await request('me');
+    state.user = user;
+  },
+
+  async getPlaylists() {
+    const response = await request(`users/${state.user.id}/playlists`);
+    return response.items;
+  },
+
+  async getTracks(playlistId, progressCallback) {
+    const tracksUrl = `users/${state.user.id}/playlists/${playlistId}/tracks`;
+
+    async function getPage(tracks, url) {
+      const { next, limit, items, offset, total } = await request(url);
+      if (next) {
+        progressCallback(offset + limit, total);
+        return getPage([...tracks, ...items], next);
+      }
+      return tracks;
     }
 
-    localStorage.removeItem(stateKey);
-    if (accessToken) {
-      const response = await fetch('https://api.spotify.com/v1/me', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const body = await response.json();
-      console.log(body);
-    }
+    const tracks = await getPage([], tracksUrl);
+
+    return tracks;
   },
 };
 

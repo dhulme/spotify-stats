@@ -1,6 +1,21 @@
 <template>
   <div id="app">
     <button @click="logIn">Log in</button>
+
+    <p>Choose a playlist</p>
+    <select v-model="playlistId">
+      <option
+        v-for="playlist in playlists"
+        :key="playlist.id"
+        :value="playlist.id"
+      >
+        {{ playlist.name }}
+      </option>
+    </select>
+    <button @click="analyze">Analyze!</button>
+    <div v-if="fetchPercent">
+      Loading tracks {{ fetchPercent }}%...
+    </div>
   </div>
 </template>
 
@@ -12,11 +27,34 @@ export default {
   methods: {
     logIn() {
       auth.logIn();
+    },
+    async analyze() {
+      const tracks = await auth.getTracks(this.playlistId, (value, total) => {
+        this.fetched = value;
+        this.fetchedTotal = total;
+      });
+      this.fetched = this.fetchedTotal;
+      console.log(tracks);
     }
   },
-  created() {
-    auth.auth();
-  }
+  data() {
+    return {
+      playlists: [],
+      playlistId: null,
+      fetched: 0,
+      fetchedTotal: 0,
+    };
+  },
+  computed: {
+    fetchPercent() {
+      return Math.round((this.fetched / this.fetchedTotal) * 100);
+    },
+  },
+  async created() {
+    await auth.setUser();
+    const playlists = await auth.getPlaylists();
+    this.playlists = playlists;
+  },
 }
 </script>
 
