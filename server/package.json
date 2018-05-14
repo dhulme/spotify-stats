@@ -1,0 +1,25 @@
+{
+  "name": "spotify-stats",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/main"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhulme/spotify-stats.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dhulme/spotify-stats/issues"
+  },
+  "homepage": "https://github.com/dhulme/spotify-stats#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "express": "^4.16.3",
+    "nodemon": "^1.17.4"
+  }
+}
