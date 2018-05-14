@@ -16,14 +16,19 @@
     <div v-if="fetchPercent">
       Loading tracks {{ fetchPercent }}%...
     </div>
+
+    <ChartTimeVsTotalTracks :tracks="tracks" />
   </div>
 </template>
 
 <script>
 import auth from './auth';
+import ChartTimeVsTotalTracks from './components/ChartTimeVsTotalTracks';
 
 export default {
-  name: 'App',
+  components: {
+    ChartTimeVsTotalTracks,
+  },
   methods: {
     logIn() {
       auth.logIn();
@@ -34,7 +39,7 @@ export default {
         this.fetchedTotal = total;
       });
       this.fetched = this.fetchedTotal;
-      console.log(tracks);
+      this.tracks = tracks;
     }
   },
   data() {
@@ -43,6 +48,7 @@ export default {
       playlistId: null,
       fetched: 0,
       fetchedTotal: 0,
+      tracks: [],
     };
   },
   computed: {
