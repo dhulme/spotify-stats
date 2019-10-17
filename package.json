@@ -20,7 +20,7 @@
   "scripts": {
     "build": "rollup -c",
     "autobuild": "rollup -c -w",
-    "dev": "run-p start:dev autobuild",
+    "dev": "run-p serve:dev autobuild",
     "start": "npm run dev",
 		"serve:dev": "sirv public --single --dev",
 		"serve": "sirv public --single"

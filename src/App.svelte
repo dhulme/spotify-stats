@@ -25,12 +25,26 @@ import { onMount } from 'svelte';
 	}
 
 	.credits {
-		border-left: 1px solid #fff;
 		font-size: .75rem;
+		color: #fff;
 	}
 
 	.credits a {
 		color: #fff;
+	}
+
+	.navbar-brand {
+		display: block;
+	}
+
+	@media (min-width: 1024px) {
+		.navbar-brand {
+			display: flex
+		}
+
+		.credits {
+			border-left: 1px solid #fff;
+		}
 	}
 </style>
 
