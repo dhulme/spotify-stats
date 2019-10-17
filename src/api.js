@@ -27,6 +27,8 @@ function getHashParams() {
 }
 
 const stateKey = 'spotify_auth_state';
+const expiresKey = 'spotify_auth_expires'
+const accessTokenKey = 'spotfy_auth_access_token';
 
 const state = {};
 
@@ -35,14 +37,16 @@ async function request(endpoint) {
     headers: {
       Authorization: `Bearer ${state.accessToken}`,
     },
-  });
-  return response.json();
+	});
+	if (response.status === 401) {
+		return logIn();
+	}
+	return response.json();
 }
 
-const auth = {
-  logIn() {
+export function logIn() {
     const clientId = '7e3bd48a271a4d408463315a7696c35f';
-    const redirectUri = 'http://localhost:8080';
+    const redirectUri = location.href;
 
     const state = generateRandomString(16);
 
@@ -57,43 +61,68 @@ const auth = {
     url += `&state=${encodeURIComponent(state)}`;
 
     window.location.href = url;
-  },
+  }
 
-  async setUser() {
+  export async function initToken() {
     const params = getHashParams();
 
-    const accessToken = params.access_token;
+		// const accessToken = params.access_token;
+		// const expiresIn = params.expires_in;
 
-    if (!accessToken) {
-      return;
-    }
-  
-    state.accessToken = accessToken;
-    const user = await request('me');
-    state.user = user;
-  },
+		if (params.state && localStorage.getItem(stateKey) !== params.state) {
+			throw new Error('State key check failed')
+		}
 
-  async getPlaylists() {
+		// If new token fetched
+		if (params.access_token) {
+			localStorage.setItem(accessTokenKey, params.access_token);
+			state.accessToken = params.access_token
+			localStorage.setItem(expiresKey, (state.expires_in * 1000) + Date.now());
+			location.hash = ''
+			return;
+		}
+
+		const accessToken = localStorage.getItem(accessTokenKey)
+		const expires = localStorage.getItem(expiresKey)
+		state.accessToken = accessToken;
+
+		// If token expired
+		if (!accessToken || expires > Date.now()) {
+			logIn();
+		}
+	}
+
+	export async function initUser() {
+		const userResponse = await request('me');
+		const user = {
+			id: userResponse.id,
+			displayName: userResponse.display_name,
+			email: userResponse.email,
+			image: userResponse.images[0].url,
+			profileUrl: userResponse.external_urls.spotify
+		}
+		state.user = user;
+		
+		return user;
+	}
+	
+  export async function getPlaylists() {
     const response = await request(`users/${state.user.id}/playlists`);
     return response.items;
-  },
+  }
 
-  async getTracks(playlistId, progressCallback) {
+  export async function getTracks(playlistId, progressCallback) {
     const tracksUrl = `users/${state.user.id}/playlists/${playlistId}/tracks`;
 
     async function getPage(tracks, url) {
-      const { next, limit, items, offset, total } = await request(url);
-      if (next) {
+			const { next, limit, items, offset, total } = await request(url);
+
+			if (next) {
         progressCallback(offset + limit, total);
         return getPage([...tracks, ...items], next);
       }
-      return tracks;
+      return [...tracks, ...items];
     }
 
-    const tracks = await getPage([], tracksUrl);
-
-    return tracks;
-  },
-};
-
-export default auth;
+    return getPage([], tracksUrl);
+  }

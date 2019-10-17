@@ -1,0 +1,33 @@
+<script>
+  import { onMount, createEventDispatcher } from "svelte";
+  import { getPlaylists } from "./api.js";
+
+  const dispatch = createEventDispatcher();
+
+  let playlists = [];
+  let loadingPlaylists = false;
+  let selectedPlaylistId;
+
+  onMount(async () => {
+    loadingPlaylists = true;
+		playlists = await getPlaylists();
+		selectedPlaylistId = playlists[0].id;
+    loadingPlaylists = false;
+	});
+	
+	let debounceTimeout
+	$: {
+		clearTimeout(debounceTimeout)
+		debounceTimeout = setTimeout(() => {
+			dispatch("playlistSelected", selectedPlaylistId);
+		}, 500, selectedPlaylistId)
+	}
+</script>
+
+    <div class="select" class:is-loading={loadingPlaylists}>
+      <select bind:value={selectedPlaylistId}>
+        {#each playlists as playlist (playlist.id)}
+          <option value={playlist.id}>{playlist.name}</option>
+        {/each}
+      </select>
+</div>
