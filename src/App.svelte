@@ -1,6 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import { logIn, initUser, initToken } from "./api.js";
+  import { logIn, logOut, initUser, initToken } from "./api.js";
   import SelectPlaylist from "./SelectPlaylist.svelte";
   import TrackFetcher from "./TrackFetcher.svelte";
   import ChartTracks from "./ChartTracks.svelte";
@@ -16,12 +16,18 @@
     await initToken();
     initUserPromise = initUser();
     user = await initUserPromise;
-  });
+	});
+	
+	function handleLogOut() {
+		logOut();
+		user = null;
+	}
 </script>
 
 <style>
   .user {
-    color: #fff;
+		color: #fff;
+		margin-right: .5rem;
   }
 
   .credits {
@@ -35,7 +41,12 @@
 
   .navbar-brand {
     display: block;
-  }
+	}
+	
+	.profile-photo {
+		margin-right: 0.5rem;
+		border-radius: 50%;
+	}
 
   @media (min-width: 1024px) {
     .navbar-brand {
@@ -64,7 +75,9 @@
         <p>Loading...</p>
       {:then user}
         {#if user}
+					{#if user.image}<img class="profile-photo" src={user.image} alt="Profile photo" />{/if}
           <p class="user">{user.displayName}</p>
+					<button class="button is-small" on:click={handleLogOut}>Log out</button>
         {/if}
       {:catch error}
         <p>Failed to get user</p>
