@@ -29,7 +29,7 @@
 
 <div class="select" class:is-loading={loadingPlaylists}>
   <select bind:value={selectedPlaylistId}>
-		<option value={null}>Library</option>
+    <option value={null}>Library</option>
     {#each playlists as playlist (playlist.id)}
       <option value={playlist.id}>{playlist.name}</option>
     {/each}

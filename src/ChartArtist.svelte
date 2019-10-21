@@ -30,20 +30,22 @@
         maintainAspectRatio: false,
         legend: {
           display: false
-				},
-				scales: {
-					yAxes: [{
-						type: 'linear',
-						ticks: {
-							precision: 0,
-							min: 0
-						},
-						scaleLabel: {
-							labelString: 'Tracks',
-							display: true
-						}
-					}]
-				}
+        },
+        scales: {
+          yAxes: [
+            {
+              type: "linear",
+              ticks: {
+                precision: 0,
+                min: 0
+              },
+              scaleLabel: {
+                labelString: "Tracks",
+                display: true
+              }
+            }
+          ]
+        }
       }
     };
   }

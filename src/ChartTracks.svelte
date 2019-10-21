@@ -1,6 +1,6 @@
 <script>
-	import { onMount } from "svelte";
-	import Chart from './Chart.svelte';
+  import { onMount } from "svelte";
+  import Chart from "./Chart.svelte";
 
   export let tracks;
 
